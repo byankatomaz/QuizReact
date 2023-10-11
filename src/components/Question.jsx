@@ -1,24 +1,48 @@
-import { useContext } from 'react'
-import { QuizContext } from '../context/quiz';
-import Option from './Option';
+import { useContext, useState } from "react";
+import { QuizContext } from "../context/quiz";
+import Option from "./Option";
+
 import "./Question.css";
 
-export default function Question(){
+const Question = () => {
+  const [quizState, dispatch] = useContext(QuizContext);
+  const currentQuestion = quizState.questions[quizState.currentQuestion];
 
-    const [quizState, dispatch] = useContext(QuizContext)
+  const onSelectOption = (option) => {
+    dispatch({
+      type: "CHECK_ANSWER",
+      payload: { answer: currentQuestion.answer, option },
+    });
+  };
 
-    const currentQuestion = quizState.questions[quizState.currentQuestion]
+  console.log(quizState.optionToHide);
 
-    return(
-        <div id='question'>
-            <p>Pergunta de {quizState.currentQuestion + 1} a {quizState.questions.length}</p>
-            <h2>{currentQuestion.question}</h2>
-            <div id="options-container">
-                {currentQuestion.options.map((option) => (
-                    <Option option={option}/>
-                ))}
-            </div>
-            <button onClick={() => dispatch({type: "CHANGE_QUESTION"})}>Continuar</button>
-        </div>
-    );
-}
+  return (
+    <div id="question">
+      <p>
+        Pergunta {quizState.currentQuestion + 1} de {quizState.questions.length}
+      </p>
+      <h2>{currentQuestion.question}</h2>
+      <div id="options-container">
+        {currentQuestion.options.map((option) => (
+          <Option
+            option={option}
+            key={option}
+            answer={currentQuestion.answer}
+            selectOption={() => onSelectOption(option)}
+            hide={quizState.optionToHide === option ? "hide" : null}
+          />
+        ))}
+      </div>
+
+      {quizState.answerSelected && (
+        <button onClick={() => dispatch({ type: "CHANGE_QUESTION" })}>
+          Continuar
+        </button>
+      )}
+    </div>
+  );
+};
+
+export default Question;
+
